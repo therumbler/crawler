@@ -9,6 +9,7 @@ mypy = "*"
 [packages]
 requests-html = "*"
 aiohttp = "*"
+defusedxml = "*"
 
 [requires]
 python_version = "3.7"
