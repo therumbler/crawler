@@ -22,7 +22,7 @@ def setup_logging(level=logging.DEBUG):
     handler.setFormatter(formatter)
     root.addHandler(handler)
 
-COMPLETED_URLS = set()
+COMPLETED_URLS: set = set()
 
 async def feed_worker(name, queue, session):
     logger.info('launching feed_worker %s', name)
