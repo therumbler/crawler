@@ -7,6 +7,7 @@ import logging
 import sys
 
 import aiohttp
+from aiomultiprocess import Pool
 
 from crawler import get_links
 from crawler.crawler import fetch
@@ -67,30 +68,16 @@ async def worker(name, queue, feed_queue, session):
             logger.debug('found feed url %s', feed_url)
             await feed_queue.put(feed_url)
 
-async def main():
-    """let's do it!"""
-    setup_logging(level=logging.DEBUG)
-   
+
+async def crawl(start_url):
+    """single process to start everything off"""
     queue = asyncio.Queue()
     feed_queue = asyncio.Queue()
-    start_urls = ['https://www.hvper.com', 'https://alltop.com']
-    
-    for start_url in start_urls:
-        queue.put_nowait(start_url)
+    queue.put_nowait(start_url)
+
     timeout = aiohttp.ClientTimeout(total=10)
     async with aiohttp.ClientSession(timeout=timeout) as session:
-        logger.debug('session created')
-        #links, feeds = await get_links(session, 'https://irumble.com/beatswithbenji')
-        #print(feeds)
-        #feed_string = await fetch(session, 'https://irumble.com/beatswithbenji/feed.xml')
-        # feed_url = 'https://daringfireball.net/feeds/main'
-        # feed_url = 'https://mjtsai.com/blog/feed/'
-        # feed_url = 'https://www.tomshardware.com/feeds/rss2/all.xml'
-        # feed_url = 'https://feeds.abcnews.com/abcnews/topstories'
-        # feed_string = await fetch(session, feed_url)
-        # json_feed = await feed2json(feed_string)
-        # print(json_feed['items'][0])
-        # return
+
         tasks = []
         task = asyncio.create_task(feed_worker(f'feed_worker-1', feed_queue, session))
         tasks.append(task)
@@ -101,5 +88,16 @@ async def main():
         await queue.join()
 
     await asyncio.gather(*tasks, return_exceptions=True)
+
+async def main():
+    """let's do it!"""
+    setup_logging(level=logging.DEBUG)
+   
+    start_urls = ['https://www.hvper.com', 'https://alltop.com']
+    
+    async with Pool() as pool:
+        results = await pool.map(crawl, start_urls)
+
+    
 if __name__ == "__main__":
     asyncio.run(main())

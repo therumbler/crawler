@@ -10,6 +10,7 @@ mypy = "*"
 requests-html = "*"
 aiohttp = "*"
 defusedxml = "*"
+aiomultiprocess = "*"
 
 [requires]
 python_version = "3.7"
