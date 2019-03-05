@@ -38,7 +38,10 @@ async def feed_worker(name, queue, session):
             feed_string = await fetch(session, feed_url)
             logger.info('fetched url %s', feed_url)
             
-            json_feed = await feed2json(feed_string)
+            json_feed = feed2json(feed_string)
+            if not json_feed:
+                logger.error('unable to parse feed_url %s', feed_url)
+        
             COMPLETED_URLS.add(feed_url)
         except Exception as ex:
             logger.exception(ex)
@@ -71,7 +74,7 @@ async def main():
     queue = asyncio.Queue()
     feed_queue = asyncio.Queue()
     start_urls = ['https://www.hvper.com', 'https://alltop.com']
-   
+    
     for start_url in start_urls:
         queue.put_nowait(start_url)
     timeout = aiohttp.ClientTimeout(total=10)

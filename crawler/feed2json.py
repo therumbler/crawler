@@ -92,15 +92,18 @@ def _atom_parser(tree, feed):
         feed['items'].append(item)
     return feed
 
-async def feed2json(feed_string: str) -> dict:
+def feed2json(feed_string: str) -> dict:
     logger.info('in feed2json...')
     feed = {
         'version' : 'https://jsonfeed.org/version/1',
         'items': []
     }
-    
-    tree = ET.fromstring(feed_string)
-
+    try:
+        tree = ET.fromstring(feed_string)
+    except Exception as ex:
+        logger.error('cannot parse feed_string')
+        logger.exception(ex)
+        return None
     if tree.tag == 'rss':
         parser = _rss_parser
     elif 'feed' in tree.tag:
