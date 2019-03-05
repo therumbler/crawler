@@ -54,8 +54,14 @@ def _item_parser(item_obj):
     if enclosure is not None:
         if 'attachments' not in item:
             item['attachments'] = []
+        size_in_bytes = None
+        try:
+            size_in_bytes = int(enclosure.attrib['length'])
+        except KeyError as ex:
+            pass
+        
         attachment = {
-            'size_in_bytes': int(enclosure.attrib['length']),
+            'size_in_bytes': size_in_bytes,
             'url': enclosure.attrib['url'],
             'mime_type': enclosure.attrib['type']
         }
